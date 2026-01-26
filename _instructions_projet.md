@@ -12,7 +12,7 @@ Pour commencer, n'hésitez pas à réutiliser les comportements déjà obtenus d
 * _au moins_ un robot utilisant exclusivement ou en partie un comportement (p.ex. Braitenberg) dont les poids ont été optimisé au préalable par algorithme génétique
 
 Tout les coups sont permis, tant que votre code tient exclusivement dans la fonction _step_ de votre robot et que vous respectez les contraintes suivantes:
-* Information interne: (1) un robot connait sont identifiant (_self.robot_id_). Utile pour éventuellement programmer des robots spécialistes. (2) Pour chaque robot, **un seul et unique entier** est autorisé comme mémoire (_self.memory_). Utile par exemple pour faire un compteur ou coder une variable d'état permettant d'alterner entre plusieurs comportements.
+* Information interne: (1) un robot connait son identifiant (_self.robot_id_). Cela peut être utile pour programmer des robots spécialistes, par exemple. (2) Pour chaque robot, **un seul et unique entier** est autorisé comme mémoire (_self.memory_). Utile par exemple pour faire un compteur ou coder une variable d'état permettant d'alterner entre plusieurs comportements.
 * Information sensorielle: les senseurs donnent des informations sur la distance à l'obstacle, mais aussi sur le type d'obstacle et, si c'est un robot, son numéro et son équipe. Utile pour créer des comportements plus complexes que de l'évitement d'obstacles.
 * **Interdit**: pas de communication, pas d'information supplémentaire que celles données par les senseurs, pas de construction ou d'utilisation de cartes, pas de mémoire en plus de l'entier *memory*
 
