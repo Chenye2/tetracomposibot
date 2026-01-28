@@ -42,6 +42,7 @@ class Robot_player(Robot):
                 print ("\trobot's team (if relevant)      =",sensor_team)
 
         translation = sensors[sensor_front]*0.5 # A MODIFIER
+        
         rotation = 0.5 # A MODIFIER
 
         self.iteration = self.iteration + 1        
