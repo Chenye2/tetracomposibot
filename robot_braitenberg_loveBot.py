@@ -47,4 +47,3 @@ class Robot_player(Robot):
         self.iteration = self.iteration + 1        
         return translation, rotation, False
     
-
