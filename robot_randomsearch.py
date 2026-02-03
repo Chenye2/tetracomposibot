@@ -83,10 +83,10 @@ class Robot_player(Robot):
         
         # rejouer la meilleure stratégie à l'infini
         if self.replay_best and self.iteration >= self.it_per_evaluation :
-            print ("\n\tparameters           =",self.param)
-            print ("\ttranslations         =",self.log_sum_of_translation,"; rotations =",self.log_sum_of_rotation) # *effective* translation/rotation (ie. measured from displacement)
-            print ("\tdistance from origin =",math.sqrt((self.x-self.x_0)**2+(self.y-self.y_0)**2))
-            print ("\tscore                =", self.score)
+            #print ("\n\tparameters           =",self.param)
+            #print ("\ttranslations         =",self.log_sum_of_translation,"; rotations =",self.log_sum_of_rotation) # *effective* translation/rotation (ie. measured from displacement)
+            #print ("\tdistance from origin =",math.sqrt((self.x-self.x_0)**2+(self.y-self.y_0)**2))
+            #print ("\tscore                =", self.score)
             self.iteration = 1
             return 0, 0, True
         

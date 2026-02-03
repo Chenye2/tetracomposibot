@@ -30,7 +30,7 @@ class Robot_player(Robot):
     prev_rotation = 0
 
     replay_best = False
-    max_trials = 6 # nombre max de stratégies à evaluer
+    max_trials = 100 # nombre max de stratégies à evaluer
 
     x_0 = 0
     y_0 = 0
@@ -63,8 +63,8 @@ class Robot_player(Robot):
                     # ajoute le score de cette evaluation et incrémente le compteur
                     self.sum_score += self.score
                     self.current_eval += 1
-                    print("current eval : ", self.current_eval)
-                    print("somme score : ", self.sum_score)
+                    #print("current eval : ", self.current_eval)
+                    #print("somme score : ", self.sum_score)
 
                     # reset le score à 0 pour calculer la prochaine evaluation
                     self.score = 0
@@ -108,10 +108,10 @@ class Robot_player(Robot):
         
         # rejouer la meilleure stratégie à l'infini
         if self.replay_best and self.iteration >= self.it_per_evaluation :
-            print ("\n\tparameters           =",self.param)
-            print ("\ttranslations         =",self.log_sum_of_translation,"; rotations =",self.log_sum_of_rotation) # *effective* translation/rotation (ie. measured from displacement)
-            print ("\tdistance from origin =",math.sqrt((self.x-self.x_0)**2+(self.y-self.y_0)**2))
-            print ("\tscore                =", self.score)
+            #print ("\n\tparameters           =",self.param)
+            #print ("\ttranslations         =",self.log_sum_of_translation,"; rotations =",self.log_sum_of_rotation) # *effective* translation/rotation (ie. measured from displacement)
+            #print ("\tdistance from origin =",math.sqrt((self.x-self.x_0)**2+(self.y-self.y_0)**2))
+            #print ("\tscore                =", self.score)
             self.iteration = 1
             return 0, 0, True
         
