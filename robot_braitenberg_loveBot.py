@@ -6,7 +6,7 @@ debug = True
 
 class Robot_player(Robot):
 
-    team_name = "Dumb"
+    team_name = "LoveBot"
     robot_id = -1
     iteration = 0
 

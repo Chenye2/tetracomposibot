@@ -1,0 +1,109 @@
+
+from robot import * 
+import math
+
+nb_robots = 0
+debug = False
+
+class Robot_player(Robot):
+
+    team_name = "RandomSearch"
+    robot_id = -1
+    iteration = 0
+
+    param = [] # stratégie courante
+    bestParam = [] # meilleure statégie
+    it_per_evaluation = 400
+    trial = 0 # numéro d'évaluation
+
+    score = 0  # score courant
+    bestScore = 0
+    bestTrial = -1 
+
+    # pour calculer les deltas effectifs
+    prev_translation = 0
+    prev_rotation = 0
+
+    replay_best = False
+    max_trials = 5 # nombre max d'evaluations
+
+    x_0 = 0
+    y_0 = 0
+    theta_0 = 0 # in [0,360]
+
+    def __init__(self, x_0, y_0, theta_0, name="n/a", team="n/a",evaluations=0,it_per_evaluation=0):
+        global nb_robots
+        self.robot_id = nb_robots
+        nb_robots+=1
+        self.x_0 = x_0
+        self.y_0 = y_0
+        self.theta_0 = theta_0
+        self.param = [random.randint(-1, 1) for i in range(8)]
+        self.it_per_evaluation = it_per_evaluation
+        super().__init__(x_0, y_0, theta_0, name=name, team=team)
+
+    def reset(self):
+        super().reset()
+        self.score = 0
+        self.prev_translation = 0
+        self.prev_rotation = 0
+
+    def step(self, sensors, sensor_view=None, sensor_robot=None, sensor_team=None):
+
+        if self.iteration % self.it_per_evaluation == 0 and (not self.replay_best):
+                if self.iteration > 0:
+                    # sauvegarde la meilleure stratégie
+                    if self.score > self.bestScore:
+                         self.bestScore = self.score
+                         self.bestParam = self.param.copy()
+                         self.bestTrial = self.trial
+                         print("NEW BEST SCORE :", self.bestScore)
+                    print ("\tparameters           =",self.param)
+                    print ("\ttranslations         =",self.log_sum_of_translation,"; rotations =",self.log_sum_of_rotation) # *effective* translation/rotation (ie. measured from displacement)
+                    print ("\tdistance from origin =",math.sqrt((self.x-self.x_0)**2+(self.y-self.y_0)**2))
+                    print ("\tscore                =", self.score)
+
+                # fin de recherche : rejouer la meilleur stratégie
+                if self.trial >= self.max_trials:
+                    print("\n=== END OF SEARCH ===")
+                    print("Best score :", self.bestScore)
+                    print("Best params:", self.bestParam)
+                    self.param = self.bestParam.copy()
+                    self.replay_best = True
+                    self.iteration = 0
+                    self.it_per_evaluation = 1000
+                # sinon continue la recherche
+                else :
+                    self.param = [random.randint(-1, 1) for i in range(8)]
+                    self.trial = self.trial + 1
+                    print ("Trying strategy no.",self.trial)
+
+                self.iteration += 1 
+                return 0, 0, True # ask for reset
+        
+        # rejouer la meilleure stratégie à l'infini
+        if self.replay_best and self.iteration >= self.it_per_evaluation :
+            print ("\n\tparameters           =",self.param)
+            print ("\ttranslations         =",self.log_sum_of_translation,"; rotations =",self.log_sum_of_rotation) # *effective* translation/rotation (ie. measured from displacement)
+            print ("\tdistance from origin =",math.sqrt((self.x-self.x_0)**2+(self.y-self.y_0)**2))
+            print ("\tscore                =", self.score)
+            self.iteration = 1
+            return 0, 0, True
+        
+        # fonction de contrôle (qui dépend des entrées sensorielles, et des paramètres)
+        translation = math.tanh ( self.param[0] + self.param[1] * sensors[sensor_front_left] + self.param[2] * sensors[sensor_front] + self.param[3] * sensors[sensor_front_right] )
+        rotation = math.tanh ( self.param[4] + self.param[5] * sensors[sensor_front_left] + self.param[6] * sensors[sensor_front] + self.param[7] * sensors[sensor_front_right] )
+
+        # calcule la translation et la rotation effective instantanée
+        delta_translation = self.log_sum_of_translation - self.prev_translation
+        delta_rotation = self.log_sum_of_rotation - self.prev_rotation
+
+        self.score += delta_translation * (1 - delta_rotation)
+
+        # on stocke les valeurs de cette itération
+        self.prev_translation = self.log_sum_of_translation
+        self.prev_rotation = self.log_sum_of_rotation
+
+        self.iteration = self.iteration + 1        
+
+        return translation, rotation, False
