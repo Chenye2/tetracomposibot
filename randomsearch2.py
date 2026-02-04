@@ -45,6 +45,12 @@ class Robot_player(Robot):
         self.theta_0 = theta_0
         self.param = [random.randint(-1, 1) for i in range(8)]
         self.it_per_evaluation = it_per_evaluation
+
+        # Exo 4
+        # initialise le fichier
+        with open("randomsearch2.txt", "w") as f :
+            pass
+
         super().__init__(x_0, y_0, theta_0, name=name, team=team)
 
     def reset(self):
@@ -81,6 +87,12 @@ class Robot_player(Robot):
                          self.bestParam = self.param.copy()
                          self.bestTrial = self.trial
                          print("NEW BEST SCORE :", self.bestScore)
+
+                    # Exo 4 
+                    # on sauvegarde les résultats de cette tentative
+                    with open("randomsearch2.txt", "a") as f :
+                        f.write(f"{self.trial}, {self.sum_score}, {self.bestScore}\n")
+
                     print ("\tparameters           =",self.param)
                     print ("\ttranslations         =",self.log_sum_of_translation,"; rotations =",self.log_sum_of_rotation) # *effective* translation/rotation (ie. measured from displacement)
                     print ("\tdistance from origin =",math.sqrt((self.x-self.x_0)**2+(self.y-self.y_0)**2))

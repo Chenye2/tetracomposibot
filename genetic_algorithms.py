@@ -11,14 +11,15 @@ class Robot_player(Robot):
     robot_id = -1
     iteration = 0
 
-    param = [] # stratégie courante
+    param = [] # stratégie courante / mutation / enfant
 
     parent_param = [] # stratégie du parent
 
     it_per_evaluation = 400
     trial = 0 # numéro d'évaluation
 
-    score = 0  # score courant
+    score = 0  # score courant / mutation / enfant
+    parent_score = 0 # score parent
 
     # pour chaque statégie
     current_eval = 0  # nombre d'evaluation effectué = {0, 1, 2}
@@ -50,6 +51,12 @@ class Robot_player(Robot):
         self.parent_param = self.param.copy()
 
         self.it_per_evaluation = it_per_evaluation
+
+        # Exo 4
+        # initialise le fichier
+        with open("genetic_algorithms.txt", "w") as f :
+            pass
+
         super().__init__(x_0, y_0, theta_0, name=name, team=team)
 
     def reset(self):
@@ -90,7 +97,12 @@ class Robot_player(Robot):
                         self.parent_score = self.sum_score
                         self.parent_param = self.param.copy()
                     else:
-                        if debug: print("Trial", self.trial, ": Enfant rejeté", self.sum_score)
+                        pass
+
+                    # Exo 4 
+                    # on sauvegarde les résultats de cette tentative
+                    with open("genetic_algorithms.txt", "a") as f :
+                        f.write(f"{self.trial}, {self.sum_score}, {self.parent_score}\n")
 
                 # vérification de la fin de l'expérience
                 if self.trial >= self.max_trials:
