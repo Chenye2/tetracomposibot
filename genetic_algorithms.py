@@ -96,6 +96,7 @@ class Robot_player(Robot):
                 if self.trial >= self.max_trials:
                     print("\n=== FIN DE L'ÉVOLUTION ===")
                     print("Meilleurs paramètres :", self.parent_param)
+                    print("Meilleurs scores :", self.parent_score)
                     self.param = self.parent_param.copy()
                     self.replay_best = True
                     self.iteration = 1
