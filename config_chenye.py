@@ -39,11 +39,11 @@ def initialize_robots(arena_size=-1, particle_box=-1): # particle_box: size of t
 
     robots.append(robot_braitenberg_avoider.Robot_player(25, 70, 50, name="My Robot", team="C"))
 
-    #robots.append(robot_braitenberg_loveWall.Robot_player(30, y_center, 90, name="My Robot", team="D"))
+    robots.append(robot_braitenberg_loveWall.Robot_player(30, y_center, 90, name="My Robot", team="D"))
 
     #robots.append(robot_braitenberg_hateWall.Robot_player(40, 90, 0, name="My Robot", team="E"))
 
-    robots.append(robot_braitenberg_loveBot.Robot_player(23, 75, 50, name="My Robot", team="B"))
+    #robots.append(robot_braitenberg_loveBot.Robot_player(23, 75, 50, name="My Robot", team="B"))
 
     #robots.append(robot_braitenberg_hateBot.Robot_player(23, 90, 90, name="My Robot", team="B"))
     
