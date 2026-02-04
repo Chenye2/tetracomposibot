@@ -123,7 +123,7 @@ class Robot_player(Robot):
         delta_translation = self.log_sum_of_translation - self.prev_translation
         delta_rotation = self.log_sum_of_rotation - self.prev_rotation
 
-        self.score += delta_translation * (1 - delta_rotation)
+        self.score += delta_translation * (1 - abs(delta_rotation))
 
         # on stocke les valeurs de cette itération
         self.prev_translation = self.log_sum_of_translation

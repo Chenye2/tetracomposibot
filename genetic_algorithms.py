@@ -30,7 +30,7 @@ class Robot_player(Robot):
     prev_rotation = 0
 
     replay_best = False
-    max_trials = 100 # nombre max de stratégies à evaluer
+    max_trials = 500 # nombre max de stratégies à evaluer
 
     x_0 = 0
     y_0 = 0
@@ -96,7 +96,7 @@ class Robot_player(Robot):
                 if self.trial >= self.max_trials:
                     print("\n=== FIN DE L'ÉVOLUTION ===")
                     print("Meilleurs paramètres :", self.parent_param)
-                    print("Meilleurs scores :", self.parent_score)
+                    print("Meilleur score :", self.parent_score)
                     self.param = self.parent_param.copy()
                     self.replay_best = True
                     self.iteration = 1

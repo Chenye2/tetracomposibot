@@ -25,7 +25,7 @@ class Robot_player(Robot):
     prev_rotation = 0
 
     replay_best = False
-    max_trials = 5 # nombre max d'evaluations
+    max_trials = 500 # nombre max d'evaluations
 
     x_0 = 0
     y_0 = 0

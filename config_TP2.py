@@ -39,5 +39,4 @@ def initialize_robots(arena_size=-1, particle_box=-1): # particle_box: size of t
     #robots.append(randomsearch2.Robot_player(x_center, y_center, 0, name="RandomSearch 2 Bot", team="C",evaluations=evaluations,it_per_evaluation=it_per_evaluation))
     robots.append(genetic_algorithms.Robot_player(x_center, y_center, 0, name="Genetic Bot", team="D",evaluations=evaluations,it_per_evaluation=it_per_evaluation))
 
-
     return robots
