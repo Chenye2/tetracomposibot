@@ -22,7 +22,7 @@ class Robot_player(Robot):
         super().__init__(x_0, y_0, theta_0, name="Robot "+str(self.robot_id), team=self.team_name)
 
     def step(self, sensors, sensor_view=None, sensor_robot=None, sensor_team=None):
-        translation = sensors[sensor_front]*0.1+0.2
+        translation = sensors[sensor_front]*0.1+0.8
         rotation = 0.2 * sensors[sensor_left] + 0.2 * sensors[sensor_front_left] - 0.2 * sensors[sensor_right] - 0.2 * sensors[sensor_front_right] + (random.random()-0.5)*1. #+ sensors[sensor_front] * 0.1
         if debug == True:
             if self.iteration % 100 == 0 and self.robot_id == 0:

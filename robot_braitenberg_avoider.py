@@ -19,7 +19,9 @@ class Robot_player(Robot):
     def step(self, sensors, sensor_view=None, sensor_robot=None, sensor_team=None):
         
         translation = sensors[sensor_front]*0.8
-        rotation = 0.5 * (1 - sensors[sensor_front]) + 0.5 * (sensors[sensor_front_left] - sensors[sensor_front_right]) + (random.random()-0.5)*0.15
+        # rotation = 0.5 * (1 - sensors[sensor_front]) + 0.5 * (sensors[sensor_front_left] - sensors[sensor_front_right]) + (random.random()-0.5)*0.15
+
+        rotation = (1 - sensors[sensor_front])*random.choice([1, -1]) - (1 - sensors[sensor_front_left]) + (1 - sensors[sensor_front_right])
 
         if debug == True:
             if self.iteration % 100 == 0:
