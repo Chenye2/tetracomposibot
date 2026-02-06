@@ -30,7 +30,7 @@ class Robot_player(Robot):
     prev_rotation = 0
 
     replay_best = False
-    max_trials = 100 # nombre max de stratégies à evaluer
+    max_trials = 1000 # nombre max de stratégies à evaluer
 
     x_0 = 0
     y_0 = 0
