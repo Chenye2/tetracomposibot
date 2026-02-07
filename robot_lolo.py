@@ -40,7 +40,7 @@ class Robot_player(Robot):
                 sensor_to_robot.append(1.0)
 
         # robot 0 : prendre maximum de cases (braitenberg avoider)
-        if self.robot_id == 0 or self.robot_id == 1 or self.robot_id == 2 or self.robot_id == 3:
+        if self.robot_id == 0 or self.robot_id == 2 :
             # niveau 1 
             if front < 0.5 or left < 0.4 or right < 0.4:
                 self.memory = -15
@@ -61,31 +61,39 @@ class Robot_player(Robot):
                 rotation = (random.random() - 0.5) * 0.3
 
         # robot 1 : robot stalker (braitenberg loveBot)
-        elif self.robot_id == 1 or self.robot_id == 3:
-            # mode d'échappement si mur ou robot détecté devant
-            if (front < 0.4 or left < 0.4 or right < 0.4) and sensor_team[sensor_front] == self.team_name:
-                self.memory = -15
+        if self.robot_id == 1 or self.robot_id == 3:
+             # mode d'échappement : si mur ou robot très proche
+            if (front < 0.4 or left < 0.3 or right < 0.3):
+                self.memory = -15 # mode d'échappement pendant 15 itérations
             if self.memory < 0:
                 self.memory += 1
                 translation = 0.05
-                rotation = 0.8 * (sensors[sensor_front_left] - sensors[sensor_front_right]) + (random.random()-0.5)*0.15
-                                                                                               
+                # tourner pour sortir du coin
+                if abs(left - right) < 0.05:
+                    rotation = random.choice([-1, 1])
+                else:
+                    rotation = -1 if left < right else 1
+            
             # niveau 1 : si robot adverse détecté devant, se diriger vers lui
             elif ((sensor_to_robot[sensor_front] < 0.8 and sensor_team[sensor_front] != self.team_name) or
                   (sensor_to_robot[sensor_front_left] < 0.8 and sensor_team[sensor_front_left] != self.team_name) or
                   (sensor_to_robot[sensor_front_right] < 0.8 and sensor_team[sensor_front_right] != self.team_name)):
 
-                translation = 0.6
-                rotation = 1 * (sensor_to_robot[sensor_front_right] - sensor_to_robot[sensor_front_left]) + 0.8 * (sensor_to_robot[sensor_right] - sensor_to_robot[sensor_left])
-
+                self.memory = 0
+                
+                translation = sensors[sensor_front]*0.3 + 0.5
+                rotation = 0.8 * (sensor_to_robot[sensor_front_right] - sensor_to_robot[sensor_front_left]) + 0.5 * (sensor_to_robot[sensor_right] - sensor_to_robot[sensor_left])
+            
             # niveau 2 : si mur ou robot même équipe détecté devant, l'éviter 
             elif front < 0.8 or left < 0.6 or right < 0.6:
-                translation = 0.3
-                rotation = 0.6 * (front) + 0.6 * (left - right)
+                self.memory = 0
+                translation = front
+                rotation = 0.5 * (1 - sensors[sensor_front]) + 0.8 * (sensors[sensor_front_left] - sensors[sensor_front_right]) + (random.random()-0.5)*0.15
 
             # niveau 3 : exploration si pas de robot adverse détecté
             else:
-                translation = front*0.1 + 0.8
-                rotation = 0.2 * sensors[sensor_left] + 0.2 * sensors[sensor_front_left] - 0.2 * sensors[sensor_right] - 0.2 * sensors[sensor_front_right] + (random.random()-0.5)*1.
+                self.memory = 0
+                translation = 0.8
+                rotation = (random.random() - 0.5) * 0.3
 
         return translation, rotation, False
