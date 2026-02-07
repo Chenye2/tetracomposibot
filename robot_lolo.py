@@ -23,6 +23,8 @@ class Robot_player(Robot):
     def step(self, sensors, sensor_view=None, sensor_robot=None, sensor_team=None):
         
         front = sensors[sensor_front]
+        front_left = sensors[sensor_front_left]
+        front_right = sensors[sensor_front_right]
         left = sensors[sensor_front_left]
         right = sensors[sensor_front_right]
 
@@ -41,30 +43,8 @@ class Robot_player(Robot):
 
         # robot 0 : prendre maximum de cases (braitenberg avoider)
         if self.robot_id == 0 or self.robot_id == 2 :
-            # niveau 1 
-            if front < 0.5 or left < 0.4 or right < 0.4:
-                self.memory = -15
-            if self.memory < 0:
-                self.memory += 1
-                translation = 0.05
-                # tourner pour sortir du coin
-                if abs(left - right) < 0.05:
-                    rotation = random.choice([-1, 1])
-                else:
-                    rotation = -1 if left < right else 1
-                
-            
-            # niveau 2 : comportement Braitenberg avoider
-            if front < 0.8 or left < 0.8 or right < 0.8:
-                self.memory = 0
-                translation = front
-                rotation = 0.5 * (1 - sensors[sensor_front]) + 0.5 * (sensors[sensor_front_left] - sensors[sensor_front_right]) + (random.random()-0.5)*0.15
-
-            # niveau 3 : exploration
-            else:
-                self.memory = 0
-                translation = 0.7
-                rotation = (random.random() - 0.5) * 0.3
+            translation = front*0.3 + 0.7
+            rotation = 0.3*(1-front) + 0.4*(front_left - front_right) + 0.3*(left - right) + (random.random()-0.5)*0.2
 
         # robot 1 : robot stalker (braitenberg loveBot)
         if self.robot_id == 1 or self.robot_id == 3:
