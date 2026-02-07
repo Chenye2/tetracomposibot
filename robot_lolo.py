@@ -47,17 +47,23 @@ class Robot_player(Robot):
             if self.memory < 0:
                 self.memory += 1
                 translation = 0.05
-                rotation = 0.8 * (sensors[sensor_front_left] - sensors[sensor_front_right]) + (random.random()-0.5)*0.15
+                # tourner pour sortir du coin
+                if abs(left - right) < 0.05:
+                    rotation = random.choice([-1, 1])
+                else:
+                    rotation = -1 if left < right else 1
                 
             
             # niveau 2 : comportement Braitenberg avoider
             if front < 0.8 or left < 0.8 or right < 0.8:
+                self.memory = 0
                 translation = front
                 rotation = 0.5 * (1 - sensors[sensor_front]) + 0.5 * (sensors[sensor_front_left] - sensors[sensor_front_right]) + (random.random()-0.5)*0.15
 
             # niveau 3 : exploration
             else:
-                translation = front*0.7
+                self.memory = 0
+                translation = 0.7
                 rotation = (random.random() - 0.5) * 0.3
 
         # robot 1 : robot stalker (braitenberg loveBot)
