@@ -9,10 +9,6 @@ class Robot_player(Robot):
     robot_id = -1             # ne pas modifier. Permet de connaitre le numéro de votre robot.
     memory = 0                # vous n'avez le droit qu'a une case mémoire qui doit être obligatoirement un entier
 
-    # statégie optimisée simulée
-    bestParam = [1, 1, -1, 1, -1, 1, 1, -1] # score 869
-    # bestParam = [1, 0, 1, 1, -1, 1, 1, -1] # score 976
-
     def __init__(self, x_0, y_0, theta_0, name="n/a", team="n/a"):
         global nb_robots
         self.robot_id = nb_robots
@@ -27,41 +23,72 @@ class Robot_player(Robot):
         left = sensors[sensor_left]
         right = sensors[sensor_right]
 
-        # robot 0 : braitenberg avoider + subsomption (ou po)
-        if self.robot_id == 0 or self.robot_id == 1 or self.robot_id == 2 or self.robot_id == 3:
+        # robot 0 : braitenberg avoider
+        if self.robot_id == 0 or self.robot_id == 2 or self.robot_id == 3 :
+            # comportement deblocage
+            if self.memory < 0:
+                self.memory += 1
+                translation = 0.2
+                rotation = left - right + (random.random()-0.5)*0.15
+                return translation, rotation, False
+            
+            # detection d'obstacle
+            if front < 0.5:
+                self.memory += 1
+            else :
+                self.memory = max(0, self.memory - 1)
+            
+            # si bloqué trop longtemps, activation déblocage
+            if self.memory > 5:
+                self.memory = -10  # activer mode déblocage 10 steps
+
+            # comportement Braitenberg avoider
             translation = front*0.3 + 0.7
             rotation = 0.3*(1-front) + 0.4*(front_left - front_right) + 0.3*(left - right) + (random.random()-0.5)*0.2
 
 
-        # robot 1 : braitenberg + subsomption (si trop longtemps sans avancer : forcer tourner)
-        # elif self.robot_id == 1:
-            
-        
-        # robot 2 : competement optimisé par genetic algorithm
-        elif self.robot_id == 1 or self.robot_id == 2:
-            translation = math.tanh ( self.bestParam[0] + self.bestParam[1] * sensors[sensor_front_left] + self.bestParam[2] * sensors[sensor_front] + self.bestParam[3] * sensors[sensor_front_right] )
-            rotation = math.tanh ( self.bestParam[4] + self.bestParam[5] * sensors[sensor_front_left] + self.bestParam[6] * sensors[sensor_front] + self.bestParam[7] * sensors[sensor_front_right] )
+        # robot 1 : genetic algorithm
+        elif self.robot_id == 1:
+            # statégie optimisée simulée
+            # bestParam = [1, 1, -1, 1, -1, 1, 1, -1] # score 869
+            bestParam = [1, 0, 1, 1, -1, 1, 1, -1] # score 976
 
-        # robot 3 :comportement Braitenberg optimisé
-        else:
-            # memory alterne entre 0 et 1 pour changer de comportement tous les 50 tours
-            if self.memory >= 50:
-                self.memory = 0
-            else:
-                self.memory += 1
-
-            if self.memory < 25:
-                # comportement défensif : recule si robot ou mur devant
-                if sensor_view and (sensor_view[sensor_front] == 1 or (sensor_view[sensor_front] == 2 and sensor_team[sensor_front] != self.team_name)):
-                    translation = -0.3  # reculer doucement
-                    rotation = 0.5      # tourner pour éviter
+            sensor_to_wall = []
+            sensor_to_robot = []
+            for i in range (0,8):
+                if  sensor_view[i] == 1:
+                    sensor_to_wall.append( sensors[i] )
+                    sensor_to_robot.append(1.0)
+                elif  sensor_view[i] == 2:
+                    sensor_to_wall.append( 1.0 )
+                    sensor_to_robot.append( sensors[i] )
                 else:
-                    translation = 0.3
-                    rotation = 0
-            else:
-                # comportement offensif : avancer droit avec rotation aléatoire modérée
-                translation = 0.5
-                rotation = (random.random() - 0.5) * 0.3
+                    sensor_to_wall.append(1.0)
+                    sensor_to_robot.append(1.0)
 
+            near_wall = max(1 - front,
+                        1 - front_left,
+                        1 - front_right)
+            near_robot = max(1 - front,
+                        1 - front_left,
+                        1 - front_right)
+            # hate wall
+            if near_wall > 0.6 :
+                print("Subsomption : HATE WALL")
+                translation = front
+                rotation = 0.6 * (sensor_to_wall[sensor_front_left] - sensor_to_wall[sensor_front_right]) + 0.6 * (sensor_to_wall[sensor_left] - sensor_to_wall[sensor_right])
+                return translation, rotation, False
+            
+            # hate bot
+            elif near_robot > 0.05 :
+                print("Subsomption : HATE BOT")
+                translation = front
+                rotation = 1.0 * (sensor_to_robot[sensor_front_right] - sensor_to_robot[sensor_front_left]) + 0.7 * (sensor_to_robot[sensor_right] - sensor_to_robot[sensor_left])
+                return translation, rotation, False
+            
+            # comportement optimisé par genetic algorithm
+            translation = math.tanh ( bestParam[0] + bestParam[1] * sensors[sensor_front_left] + bestParam[2] * sensors[sensor_front] + bestParam[3] * sensors[sensor_front_right] )
+            rotation = math.tanh ( bestParam[4] + bestParam[5] * sensors[sensor_front_left] + bestParam[6] * sensors[sensor_front] + bestParam[7] * sensors[sensor_front_right] )
+                
 
         return translation, rotation, False
