@@ -7,7 +7,7 @@ import arenas
 display_mode = 1
 arena = 1
 position = False 
-max_iterations = 5001 #401*500
+max_iterations = 2001 #401*500
 
 # affichage
 
