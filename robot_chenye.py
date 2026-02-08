@@ -24,7 +24,7 @@ class Robot_player(Robot):
         right = sensors[sensor_right]
 
         # robot 0 : braitenberg avoider
-        if self.robot_id == 0 or self.robot_id == 2 or self.robot_id == 3 :
+        if self.robot_id == 0 or self.robot_id == 2 :
             # comportement deblocage
             if self.memory < 0:
                 self.memory += 1
@@ -48,7 +48,7 @@ class Robot_player(Robot):
 
 
         # robot 1 : genetic algorithm
-        elif self.robot_id == 1:
+        elif self.robot_id == 1 or self.robot_id == 3:
             # statégie optimisée simulée
             # bestParam = [1, 1, -1, 1, -1, 1, 1, -1] # score 869
             bestParam = [1, 0, 1, 1, -1, 1, 1, -1] # score 976
@@ -65,30 +65,51 @@ class Robot_player(Robot):
                 else:
                     sensor_to_wall.append(1.0)
                     sensor_to_robot.append(1.0)
+            
+            near_wall = max(
+                1 - sensor_to_wall[sensor_front],
+                1 - sensor_to_wall[sensor_front_left],
+                1 - sensor_to_wall[sensor_front_right]
+            )
 
-            near_wall = max(1 - front,
-                        1 - front_left,
-                        1 - front_right)
-            near_robot = max(1 - front,
-                        1 - front_left,
-                        1 - front_right)
+            near_robot = max(
+                1 - sensor_to_robot[sensor_front],
+                1 - sensor_to_robot[sensor_front_left],
+                1 - sensor_to_robot[sensor_front_right]
+            )
+            
+            # si le robot est coincé trop longtemps, on active une stratégie de débloquage
+            if self.memory > 10: 
+                print("---------------------- DEBLOCAGE -------------------")
+                translation = 0.2
+                rotation = left - right + (random.random()-0.5)
+                self.memory = 0
+
             # hate wall
-            if near_wall > 0.6 :
+            elif near_wall > 0.5 :
                 print("Subsomption : HATE WALL")
-                translation = front
-                rotation = 0.6 * (sensor_to_wall[sensor_front_left] - sensor_to_wall[sensor_front_right]) + 0.6 * (sensor_to_wall[sensor_left] - sensor_to_wall[sensor_right])
-                return translation, rotation, False
+                translation = sensor_to_wall[sensor_front] * 0.3 + 0.6
+                rotation = 0.2 * (1 - sensor_to_wall[sensor_front]) + 0.4 * (sensor_to_wall[sensor_front_left] - sensor_to_wall[sensor_front_right]) + 0.4 * (sensor_to_wall[sensor_left] - sensor_to_wall[sensor_right]) + (random.random()-0.5)*0.2
             
             # hate bot
-            elif near_robot > 0.05 :
+            elif near_robot > 0.5 :
                 print("Subsomption : HATE BOT")
-                translation = front
-                rotation = 1.0 * (sensor_to_robot[sensor_front_right] - sensor_to_robot[sensor_front_left]) + 0.7 * (sensor_to_robot[sensor_right] - sensor_to_robot[sensor_left])
-                return translation, rotation, False
+                translation = sensor_to_robot[sensor_front] * 0.3 + 0.6
+                rotation = 0.2 * (1 - sensor_to_robot[sensor_front]) + 0.4 * (sensor_to_robot[sensor_front_left] - sensor_to_robot[sensor_front_right]) + 0.4 * (sensor_to_robot[sensor_left] - sensor_to_robot[sensor_right]) + (random.random()-0.5)*0.2
             
             # comportement optimisé par genetic algorithm
-            translation = math.tanh ( bestParam[0] + bestParam[1] * sensors[sensor_front_left] + bestParam[2] * sensors[sensor_front] + bestParam[3] * sensors[sensor_front_right] )
-            rotation = math.tanh ( bestParam[4] + bestParam[5] * sensors[sensor_front_left] + bestParam[6] * sensors[sensor_front] + bestParam[7] * sensors[sensor_front_right] )
+            else :
+                print("Genetic algorithm")
+                translation = math.tanh ( bestParam[0] + bestParam[1] * front_left + bestParam[2] * front + bestParam[3] * front_right )
+                rotation = math.tanh ( bestParam[4] + bestParam[5] * front_left + bestParam[6] * front + bestParam[7] * front_right )
+            
+            danger_wall  = 1.0 - sensor_to_wall[sensor_front]
+            danger_robot = 1.0 - sensor_to_robot[sensor_front]
+            danger = max(danger_wall, danger_robot)
+            if translation >0.4 and danger > 0.8 : # si le robot avance trop lentement, on considère qu'il est bloqué
+                self.memory += 1
+            else:
+                self.memory = max(0, self.memory - 1)
                 
 
         return translation, rotation, False
