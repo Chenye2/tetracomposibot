@@ -25,8 +25,8 @@ class Robot_player(Robot):
         front = sensors[sensor_front]
         front_left = sensors[sensor_front_left]
         front_right = sensors[sensor_front_right]
-        left = sensors[sensor_front_left]
-        right = sensors[sensor_front_right]
+        left = sensors[sensor_left]
+        right = sensors[sensor_right]
 
         sensor_to_wall = []
         sensor_to_robot = []
@@ -41,8 +41,26 @@ class Robot_player(Robot):
                 sensor_to_wall.append(1.0)
                 sensor_to_robot.append(1.0)
 
-        # robot 0 : prendre maximum de cases (braitenberg avoider)
+        # robot 0 : braitenberg avoider
         if self.robot_id == 0 or self.robot_id == 2 :
+            # comportement deblocage
+            if self.memory < 0:
+                self.memory += 1
+                translation = 0.2
+                rotation = left - right + (random.random()-0.5)*0.15
+                return translation, rotation, False
+            
+            # detection d'obstacle
+            if front < 0.5:
+                self.memory += 1
+            else :
+                self.memory = max(0, self.memory - 1)
+            
+            # si bloqué trop longtemps, activation déblocage
+            if self.memory > 5:
+                self.memory = -10  # activer mode déblocage 10 steps
+
+            # comportement Braitenberg avoider
             translation = front*0.3 + 0.7
             rotation = 0.3*(1-front) + 0.4*(front_left - front_right) + 0.3*(left - right) + (random.random()-0.5)*0.2
 
@@ -67,8 +85,8 @@ class Robot_player(Robot):
 
                 self.memory = 0
                 
-                translation = sensors[sensor_front]*0.3 + 0.5
-                rotation = 0.8 * (sensor_to_robot[sensor_front_right] - sensor_to_robot[sensor_front_left]) + 0.5 * (sensor_to_robot[sensor_right] - sensor_to_robot[sensor_left])
+                translation = sensor_to_robot[sensor_front] * 0.3 + 0.2 * (sensor_to_robot[sensor_front_left] + sensor_to_robot[sensor_front_right])
+                rotation = (sensor_to_robot[sensor_front_right] - sensor_to_robot[sensor_front_left]) + 0.5 * (sensor_to_robot[sensor_right] - sensor_to_robot[sensor_left])
             
             # niveau 2 : si mur ou robot même équipe détecté devant, l'éviter 
             elif front < 0.8 or left < 0.6 or right < 0.6:
