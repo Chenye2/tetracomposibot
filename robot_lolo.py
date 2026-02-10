@@ -93,8 +93,8 @@ class Robot_player(Robot):
             # si bloqué trop longtemps, activation déblocage
             if self.memory > 5:
                 self.memory = -10  # activer mode déblocage 10 steps
-            
-            # Niveau 1 : détection de robot adverse, le suivre
+
+            # Niveau 2 : détection de robot adverse, le suivre
             # si robot détecté devant, devant à gauche ou devant à droite ET si c'est robot de l'équipe adverse
             elif ((sensor_to_robot[sensor_front] < 0.8 and sensor_team[sensor_front] != self.team_name) or
                   (sensor_to_robot[sensor_front_left] < 0.8 and sensor_team[sensor_front_left] != self.team_name) or
@@ -102,14 +102,12 @@ class Robot_player(Robot):
                 
                 # réinitialise memory à zéro
                 self.memory = 0
-                
                 # avance lentement vers le robot ennemi détecté
                 translation = sensor_to_robot[sensor_front] * 0.3 + 0.2 * (sensor_to_robot[sensor_front_left] + sensor_to_robot[sensor_front_right])
-                
                 # tourne vers le robot ennemi détecté
                 rotation = (sensor_to_robot[sensor_front_right] - sensor_to_robot[sensor_front_left]) + 0.6 * (sensor_to_robot[sensor_right] - sensor_to_robot[sensor_left])
             
-            # Niveau 2 : détection d’obstacle, l’éviter
+            # Niveau 3 : détection d’obstacle, l’éviter
             elif front < 0.8 or left < 0.6 or right < 0.6:
                 # réinitialise memory à zéro
                 self.memory = 0
@@ -120,7 +118,7 @@ class Robot_player(Robot):
                 # tourne à l'opposé de l'obstacle avec une petite déviation aléatoire
                 rotation = 0.3*(1-front) + 0.5*(front_left - front_right) + 0.3*(left - right) + (random.random()-0.5)*0.2
             
-            # Niveau 3 : comportement par défaut, l’exploration
+            # Niveau 4 : comportement par défaut, l’exploration
             else:
                 self.memory = 0
                 # vitesse fixe
