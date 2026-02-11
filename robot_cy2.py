@@ -22,6 +22,8 @@ class Robot_player(Robot):
         front_right = sensors[sensor_front_right]
         left = sensors[sensor_left]
         right = sensors[sensor_right]
+        rear_left = sensors[sensor_rear_left]
+        rear_right = sensors[sensor_rear_right]
 
         sensor_to_wall = []
         sensor_to_robot = []
@@ -35,16 +37,13 @@ class Robot_player(Robot):
             else:
                 sensor_to_wall.append(1.0)
                 sensor_to_robot.append(1.0)
-        
-        # danger global devant : 1 -> libre, 0 -> mur ou robot devant
-        # danger = min(sensor_to_wall[sensor_front],sensor_to_robot[sensor_front])
 
         bestParam = [1, 0, 1, 1, -1, 1, 1, -1]
 
         # ----------------------------------------------------------------------------------------
         # Mode débloquage : activé si bloqué depuis 5 steps
         if self.memory >= 5:
-            translation = -sensors[sensor_front]  # reculer
+            translation = -front  # reculer
             rotation = 1 if front_left > front_right else -1
             self.memory = 0  # reset
             print("========== DEBLOCAGE ==========")
@@ -55,7 +54,7 @@ class Robot_player(Robot):
         dist_wall = min(
                 sensor_to_wall[sensor_front],
                 sensor_to_wall[sensor_front_left],
-                sensor_to_wall[sensor_front_right],
+                sensor_to_wall[sensor_front_right]
             )
         if dist_wall < 0.2:
 
@@ -65,8 +64,8 @@ class Robot_player(Robot):
             dist_wall_right = min(sensor_to_wall[sensor_front_right], sensor_to_wall[sensor_right], sensor_to_wall[sensor_rear_right])
             
             # si un mur est très proche, on l'évite
-            if dist_wall_left < 0.25 or dist_wall_right < 0.25:
-                translation = 0
+            if dist_wall_left < 0.2 or dist_wall_right < 0.2:
+                translation = -0.3
                 if dist_wall_left < dist_wall_right:
                     rotation = -1.0 # tourner à droite
                 else:
@@ -78,10 +77,8 @@ class Robot_player(Robot):
                 rotation = (
                     sensor_to_wall[sensor_front_left] +
                     sensor_to_wall[sensor_left] +
-                    sensor_to_wall[sensor_rear_left] -
                     sensor_to_wall[sensor_front_right] -
                     sensor_to_wall[sensor_right] -
-                    sensor_to_wall[sensor_rear_right] +
                     random.uniform(-0.5, 0.5)
                 )
                 rotation = max(-1.0, min(1.0, rotation))
@@ -95,7 +92,6 @@ class Robot_player(Robot):
             
             return translation, rotation, False 
             
-        
         # ----------------------------------------------------------------------------------------
         # NIVEAU 2 : HATE BOT
         dist_robot = min(
@@ -122,24 +118,14 @@ class Robot_player(Robot):
                     # si le senseur voit un robot de meme équipe, on note true dans near_teammate
                     if sensor_team[i] == self.team_name:
                         near_teammate = True
-            
-            # CAS 1 : si un robot est très proche, on l'évite
-            # if dist_robot_left < 0.3 or dist_robot_right < 0.3 : 
-            #     translation = 0
-            #     # le danger est du coté gauche -> tourner à droite
-            #     if dist_robot_left < dist_robot_right : 
-            #         rotation = -1.0 # tourner à droite
-            #     else: 
-            #         rotation = 1.0 # tourner à gauche
-            #     # rotation = dist_robot_right - dist_robot_left + (random.random()-0.5)*0.15
-            #     # random.uniform(-0.5, 0.5)  # tourner à gauche
-            #     print("--------------------HATE BOT 11111")
-            
-            # CAS 2 : si le robot proche est un allié, on l'évite
+           
+            # CAS 1 : si le robot proche est un allié, on l'évite
             if near_teammate:
                 translation = -0.5
-                rotation = dist_robot_left - dist_robot_right + random.uniform(-0.25, 0.25)
+                rotation = dist_robot_left - dist_robot_right + random.uniform(-0.5, 0.5)
                 print("--------------------HATE BOT 2222222222222222")
+            # CAS 2 : si un robot est très proche, on l'évite
+            # if dist_robot_left < 0.3 or dist_robot_right < 0.3 : 
             else :
                 translation = 0
                 # le danger est du coté gauche -> tourner à droite
@@ -148,7 +134,6 @@ class Robot_player(Robot):
                 else: 
                     rotation = 1.0 # tourner à gauche
                 # rotation = dist_robot_right - dist_robot_left + (random.random()-0.5)*0.15
-                # random.uniform(-0.5, 0.5)  # tourner à gauche
                 print("--------------------HATE BOT 11111")
             # CAS 3 : sinon (le robot proche est adversaire) on le bloque
             # else :
@@ -173,7 +158,7 @@ class Robot_player(Robot):
             translation = math.tanh ( bestParam[0] + bestParam[1] * front_left + bestParam[2] * front + bestParam[3] * front_right )
             rotation = math.tanh ( bestParam[4] + bestParam[5] * front_left + bestParam[6] * front + bestParam[7] * front_right )
         # robot 1 : braitenberg
-        elif self.robot_id == 1 :
+        elif self.robot_id == 1 or self.robot_id == 2:
             translation = front*0.3 + 0.7
             rotation = 0.2*(1-front) + 0.3*(front_left - front_right) + 0.3*(left - right) + (random.random()-0.5)*0.2
         # les autres robots avancent tout droit
@@ -188,9 +173,6 @@ class Robot_player(Robot):
             self.memory += 1
         else :
             self.memory = max(0, self.memory - 1)
-        # # si bloqué trop longtemps, activation déblocage
-        # if self.memory >= 5:
-        #     self.memory = -5  # activer mode déblocage 10 steps
 
         print("------------------------------------------------------------COMPORTEMENT PAR DEFAUT")
         return translation, rotation, False
