@@ -50,7 +50,9 @@ class Robot_player(Robot):
 
         if self.robot_id == 0 or self.robot_id == 1 or self.robot_id == 2 :
             # ----------------------------------------------------------------------------------------
-            # Mode débloquage : activé si bloqué depuis 5 steps
+            # Mode débloquage
+            # si le robot est considéré bloqué pendant 5 steps :
+            # on force un comportement de sortie : recule + tourne du côté le plus libre
             if self.memory >= 5:
                 translation = -front  # reculer
                 rotation = 1 if front_left > front_right else -1
@@ -64,21 +66,26 @@ class Robot_player(Robot):
                     sensor_to_wall[sensor_front_left],
                     sensor_to_wall[sensor_front_right]
                 )
+            # si un mur est très proche devant
             if dist_wall < 0.2:
 
-                # dist_wall_left : distance au mur le plus proche du coté gauche du robot (0 -> mur proche, 1 -> mur loin)
+                # distance minimale côté gauche du robot
                 dist_wall_left = min(sensor_to_wall[sensor_front_left], sensor_to_wall[sensor_left], sensor_to_wall[sensor_rear_left])
-                # dist_wall_right : distance au mur le plus proche du coté droit du robot
+                # distance minimale côté droit du robot
                 dist_wall_right = min(sensor_to_wall[sensor_front_right], sensor_to_wall[sensor_right], sensor_to_wall[sensor_rear_right])
                 
-                # coin front + left
+                # cas 1 : coin front + left
+                # mur devant et sur la gauche : recule et tourne à droite
                 if sensor_to_wall[sensor_front_left] < 0.3 and sensor_to_wall[sensor_left] < 0.2:
                     translation = -0.2
-                    rotation = -1.0  # tourner à droite
-                # coin front + right
+                    rotation = -1.0
+                # cas 2 : coin front + right
+                # mur devant et sur la droite : recule et tourne à gauche
                 elif sensor_to_wall[sensor_front_left] < 0.3 and sensor_to_wall[sensor_right] < 0.2:
                     translation = -0.2
-                    rotation = 1.0  # tourner à gauche
+                    rotation = 1.0
+                # cas 3 : mur proche sur un coté
+                # si un des deux côtés est plus proche : tourne vers le côté le plus libre
                 elif dist_wall_left < 0.2 or dist_wall_right < 0.2:
                     translation = -0.2
                     if dist_wall_left < dist_wall_right:
@@ -91,32 +98,35 @@ class Robot_player(Robot):
                     # calcul du "danger" sur gauche et droite
                     danger_left = (1 - sensor_to_wall[sensor_front_left]) + (1 - sensor_to_wall[sensor_left]) + 0.5*(1 - sensor_to_wall[sensor_rear_left])
                     danger_right = (1 - sensor_to_wall[sensor_front_right]) + (1 - sensor_to_wall[sensor_right]) + 0.5*(1 - sensor_to_wall[sensor_rear_right])
+                    # tourne du côté le moins dangereux
                     rotation = -1.0 if danger_left > danger_right else 1.0
                 
-                # -------- MISE A JOUR DE LA MEMOIRE DEBLOQUAGE --------
+                # -------- incrément mémoire --------
                 self.memory += 1
 
                 return translation, rotation, False 
                 
             # ----------------------------------------------------------------------------------------
             # NIVEAU 2 : HATE BOT
-            # distance robot-robot la plus petite du coté front
+            # distance minimale robot-robot du coté front
             dist_robot = min(
                     sensor_to_robot[sensor_front],
                     sensor_to_robot[sensor_front_left],
                     sensor_to_robot[sensor_front_right]
                 )
             if dist_robot < 0.2:
+                # calcul du danger robot à gauche
                 danger_robot_left = (
                     1 - sensor_to_robot[sensor_front_left] +
                     1 - sensor_to_robot[sensor_left] + 
                     1 - sensor_to_robot[sensor_rear_left]
-                ) # coté gauche du robot
+                )
+                # calcul du danger robot à droite
                 danger_robot_right = (
                     1 - sensor_to_robot[sensor_front_right] +
                     1 - sensor_to_robot[sensor_right] +
                     1 - sensor_to_robot[sensor_rear_right]
-                ) # coté droit du robot
+                )
 
                 near_teammate = False  # true si un robot de la même équipe est détecté par les senseurs
                 for i in range(8): # on parcourt les 8 senseurs
@@ -126,16 +136,16 @@ class Robot_player(Robot):
                         if sensor_team[i] == self.team_name:
                             near_teammate = True
             
-                # CAS 1 : si le robot proche est un allié
+                # CAS 1 : si le robot proche est un allié : tourner vers le côté le plus libre
                 if near_teammate:
                     translation = -0.2
                     rotation = 1.0 if danger_robot_left < danger_robot_right else -1.0
-                # CAS 2 : les autres robots
+                # CAS 2 : adversaire
                 else :
                     translation = 0.1
                     rotation = danger_robot_right - danger_robot_left + (random.random()-0.5)
 
-                # -------- MISE A JOUR DE LA MEMOIRE DEBLOQUAGE --------
+                # -------- incrément mémoire --------
                 self.memory += 1
 
                 return translation, rotation, False
@@ -147,7 +157,7 @@ class Robot_player(Robot):
             if self.robot_id == 0 :
                 translation = math.tanh ( bestParam[0] + bestParam[1] * front_left + bestParam[2] * front + bestParam[3] * front_right )
                 rotation = math.tanh ( bestParam[4] + bestParam[5] * front_left + bestParam[6] * front + bestParam[7] * front_right )
-            # robot 1 : braitenberg
+            # robot 1 et 2 : braitenberg
             elif self.robot_id == 1 or self.robot_id == 2:
                 translation = front*0.3 + 0.7
                 rotation = 0.2*(1-front) + 0.3*(front_left - front_right) + 0.3*(left - right) + (random.random()-0.5)*0.2
@@ -159,8 +169,9 @@ class Robot_player(Robot):
             # -------- MISE A JOUR DE LA MEMOIRE DEBLOQUAGE --------
             danger = min(front, front_left, front_right, left, right)
             # le robot essaie d'avancer mais obstacle devant -> blocage
-            if danger < 0.35 and translation > 0:
+            if danger < 0.3 and translation > 0:
                 self.memory += 1
+            # sinon on décrémente progressivement
             else :
                 self.memory = max(0, self.memory - 1)
 
