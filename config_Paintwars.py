@@ -20,8 +20,7 @@ display_time_stats = False
 
 # initialization : create and place robots at initial positions (returns a list containing the robots)
 
-import robot_cy2
-import robot_lolo
+import robot_challenger
 import robot_champion
 
 def initialize_robots(arena_size=-1, particle_box=-1): # particle_box: size of the robot enclosed in a square
@@ -39,7 +38,7 @@ def initialize_robots(arena_size=-1, particle_box=-1): # particle_box: size of t
         orientation_challenger = 0
     robots = []
     for i in range(4):
-        robots.append(robot_lolo.Robot_player(x_init_pos[0], arena_size//2-16+i*8, orientation_champion, name="", team="A"))
+        robots.append(robot_challenger.Robot_player(x_init_pos[0], arena_size//2-16+i*8, orientation_champion, name="", team="A"))
     for i in range(4):
         robots.append(robot_champion.Robot_player(x_init_pos[1], arena_size//2-16+i*8, orientation_challenger, name="", team="B"))
     return robots
