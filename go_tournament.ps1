@@ -1,6 +1,6 @@
 Clear-Host
 
-$display_mode = 1
+$display_mode = 2
 
 # Boucle de 0 à 4
 foreach ($mapId in 0..4) {
