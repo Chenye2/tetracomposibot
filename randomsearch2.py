@@ -43,7 +43,7 @@ class Robot_player(Robot):
         self.x_0 = x_0
         self.y_0 = y_0
         self.theta_0 = theta_0
-        self.param = [random.randint(-1, 1) for i in range(8)]
+        self.param = [round(random.uniform(-1,1), 1) for i in range(8)]
         self.it_per_evaluation = it_per_evaluation
 
         # Exo 4
@@ -109,7 +109,7 @@ class Robot_player(Robot):
                     self.it_per_evaluation = 1000
                 # sinon continue la recherche
                 else :
-                    self.param = [random.randint(-1, 1) for i in range(8)]
+                    self.param = [round(random.uniform(-1,1), 1) for i in range(8)]
                     self.trial = self.trial + 1
                     print ("Trying strategy no.",self.trial)
                 
