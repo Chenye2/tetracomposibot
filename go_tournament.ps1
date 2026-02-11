@@ -8,6 +8,6 @@ foreach ($mapId in 0..4) {
     
     # Boucle sur les positions initiales
     foreach ($initPos in @("True", "False")) {
-        py tetracomposibot.py config_Paintwars $mapId $initPos $display_mode
+        python3 tetracomposibot.py config_Paintwars $mapId $initPos $display_mode
     }
 }

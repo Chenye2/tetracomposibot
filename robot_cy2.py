@@ -55,6 +55,16 @@ class Robot_player(Robot):
                 sensor_to_wall[sensor_front_left],
                 sensor_to_wall[sensor_front_right]
             )
+        danger_wall_left = (
+                (1 - sensor_to_wall[sensor_front_left]) + 
+                (1 - sensor_to_wall[sensor_left]) + 
+                0.5*(1 - sensor_to_wall[sensor_rear_left])
+            )
+        danger_wall_right = (
+            (1 - sensor_to_wall[sensor_front_right]) + 
+            (1 - sensor_to_wall[sensor_right]) + 
+            0.5*(1 - sensor_to_wall[sensor_rear_right])
+        )
         if dist_wall < 0.2:
 
             # dist_wall_left : distance au mur le plus proche du coté gauche du robot (0 -> mur proche, 1 -> mur loin)
@@ -63,26 +73,24 @@ class Robot_player(Robot):
             dist_wall_right = min(sensor_to_wall[sensor_front_right], sensor_to_wall[sensor_right], sensor_to_wall[sensor_rear_right])
             
             # coin front + left
-            if sensor_to_wall[sensor_front_left] < 0.3 and sensor_to_wall[sensor_left] < 0.2:
+            if sensor_to_wall[sensor_front_left] < 0.3 and sensor_to_wall[sensor_left] < 0.3:
                 translation = -0.2
                 rotation = -1.0  # tourner à droite
             # coin front + right
-            elif sensor_to_wall[sensor_front_left] < 0.3 and sensor_to_wall[sensor_right] < 0.2:
+            elif sensor_to_wall[sensor_front_left] < 0.3 and sensor_to_wall[sensor_right] < 0.3:
                 translation = -0.2
                 rotation = 1.0  # tourner à gauche
-            elif dist_wall_left < 0.2 or dist_wall_right < 0.2:
-                translation = -0.2
-                if dist_wall_left < dist_wall_right:
-                    rotation = -0.5 # tourner à droite
-                else:
-                    rotation = 0.5 # tourner à gauche
-            # sinon, on évite les murs de manière plus douce
+            # elif dist_wall_left < 0.2 or dist_wall_right < 0.2:
+            #     translation = -0.2
+            #     rotation = 1.0 if danger_wall_left < danger_wall_right else -1
+            #     # if dist_wall_left < dist_wall_right:
+            #     #     rotation = -0.5 # tourner à droite
+            #     # else:
+            #     #     rotation = 0.5 # tourner à gauche
+            # # sinon, on évite les murs de manière plus douce
             else :
                 translation = sensor_to_wall[sensor_front]
-                # calcul du "danger" sur gauche et droite
-                danger_left = (1 - sensor_to_wall[sensor_front_left]) + (1 - sensor_to_wall[sensor_left]) + 0.5*(1 - sensor_to_wall[sensor_rear_left])
-                danger_right = (1 - sensor_to_wall[sensor_front_right]) + (1 - sensor_to_wall[sensor_right]) + 0.5*(1 - sensor_to_wall[sensor_rear_right])
-                rotation = -1.0 if danger_left > danger_right else 1.0
+                rotation = 0.5 if danger_wall_left < danger_wall_right else -0.5
             
             # -------- MISE A JOUR DE LA MEMOIRE DEBLOQUAGE --------
             self.memory += 1
@@ -150,7 +158,7 @@ class Robot_player(Robot):
         # -------- MISE A JOUR DE LA MEMOIRE DEBLOQUAGE --------
         danger = min(front, front_left, front_right, left, right)
         # le robot essaie d'avancer mais obstacle devant -> blocage
-        if danger < 0.35 and translation > 0:
+        if danger < 0.2 and translation > 0:
             self.memory += 1
         else :
             self.memory = max(0, self.memory - 1)

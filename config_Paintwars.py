@@ -4,7 +4,7 @@ import arenas
 
 # general -- first three parameters can be overwritten with command-line arguments (cf. "python tetracomposibot.py --help")
 
-display_mode = 2
+display_mode = 1
 arena = 1
 position = False
 max_iterations = 4001 #401*500
